@@ -1,3 +1,4 @@
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,32 +17,37 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneLayout;
 
 public class MainFrame extends JFrame {
-	static JTextField textField_Folder, textField_Format;
-	static JButton button_Choose, button_Reset, button_Filter, button_Stop;
-	static JComboBox combox_Operation, combox_Process;
-	static Vector<String> vector_Matched, vector_Unmatched;
-	static JList list_Matched, list_Unmatched;
-	static File fileRoot = null;
-	static String[] string_OperationMode = { "Manual", "Automate" };
-	static String[] string_ProcessMode = { "Soft", "Violent" };
-	static boolean OperationMode, ProcessMode, Start = false;
-	static String format = "";
-	static TimerTask timeTask;
-	static Timer timer;
+	static SetFormat setFormat;
+	private static JTextField textField_Folder;
+	public static JTextField textField_Format;
+	private static JButton button_Choose, button_Set, button_Filter, button_Stop;
+	private static JComboBox combox_Operation, combox_Process;
+	private static Vector<String> vector_Matched, vector_Unmatched;
+	private static JList list_Matched, list_Unmatched;
+	private static File fileRoot = null;
+	private static String[] string_OperationMode = { "Manual", "Automate" };
+	private static String[] string_ProcessMode = { "Soft", "Violent" };
+	private static boolean OperationMode, ProcessMode, Start = false;
+	public static String format = "";
+	private static TimerTask timeTask;
+	private static Timer timer;
+	private ArrayList<FormatParsing> arrayFormat = new ArrayList();
+	private ArrayList<FormatParsing> arrayFile = new ArrayList();
 
-	public static void InitLayout(JPanel panel) {
+	private static void InitLayout(JPanel panel) {
 		JFrame.setDefaultLookAndFeelDecorated(true);
 
 		panel.setLayout(null);
 
 		JLabel lable_Title = new JLabel("File Filter", JLabel.CENTER);
-		lable_Title.setFont(new Font("宋体",Font.BOLD, 25));
+		lable_Title.setFont(new Font("宋体", Font.BOLD, 25));
 		lable_Title.setBounds(300, 0, 200, 60);
-		
 		panel.add(lable_Title);
 
 		JLabel lable_Folder = new JLabel("Folder:", JLabel.LEFT);
@@ -75,55 +81,60 @@ public class MainFrame extends JFrame {
 		panel.add(button_Choose);
 
 		JLabel lable_Fromat = new JLabel("Fromat:", JLabel.CENTER);
-		lable_Fromat.setBounds(435, 60, 50, 20);
+		lable_Fromat.setBounds(440, 60, 50, 20);
 		panel.add(lable_Fromat);
 
 		textField_Format = new JTextField();
-		textField_Format.setBounds(495, 60, 190, 20);
+		textField_Format.setBounds(490, 60, 190, 20);
+		textField_Format.setEditable(false);
 		panel.add(textField_Format);
 
-		button_Reset = new JButton("Reset");
-		button_Reset.setBounds(700, 60, 80, 20);
-		button_Reset.addActionListener(new ActionListener() {
+		button_Set = new JButton("Set");
+		button_Set.setBounds(695, 60, 80, 20);
+		button_Set.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				textField_Format.setText(null);
+
+				setFormat = new SetFormat();
+				setFormat.setVisible(true);
 			}
 		});
-		panel.add(button_Reset);
+		panel.add(button_Set);
 
 		JLabel lable_Operation = new JLabel("Operation Mode:", JLabel.LEFT);
-		lable_Operation.setBounds(20, 100, 100, 20);
+		lable_Operation.setBounds(20, 110, 100, 20);
 		panel.add(lable_Operation);
 
 		combox_Operation = new JComboBox();
 		combox_Operation.addItem(string_OperationMode[0]);
 		combox_Operation.addItem(string_OperationMode[1]);
-		combox_Operation.setBounds(140, 100, 100, 20);
+		combox_Operation.setBounds(140, 110, 100, 20);
 		panel.add(combox_Operation);
 
 		JLabel lable_Process = new JLabel("Process Mode:", JLabel.LEFT);
-		lable_Process.setBounds(270, 100, 100, 20);
+		lable_Process.setBounds(270, 110, 100, 20);
 		panel.add(lable_Process);
 
 		combox_Process = new JComboBox();
 		combox_Process.addItem(string_ProcessMode[0]);
 		combox_Process.addItem(string_ProcessMode[1]);
-		combox_Process.setBounds(390, 100, 100, 20);
+		combox_Process.setBounds(390, 110, 100, 20);
 		panel.add(combox_Process);
 
 		button_Filter = new JButton("Filter");
-		button_Filter.setBounds(580, 100, 80, 20);
+		button_Filter.setBounds(600, 110, 80, 20);
 		button_Filter.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				FilterPrepare();
+				if (textField_Folder.getText().isEmpty() || textField_Format.getText().isEmpty())
+					// return;
+					FilterPrepare();
 			}
 		});
 		panel.add(button_Filter);
 
 		button_Stop = new JButton("Stop");
-		button_Stop.setBounds(680, 100, 80, 20);
+		button_Stop.setBounds(700, 110, 80, 20);
 		button_Stop.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -136,21 +147,36 @@ public class MainFrame extends JFrame {
 		list_Matched = new JList(vector_Matched);
 		list_Matched.setBorder(BorderFactory.createTitledBorder("Matched:"));
 		list_Matched.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		list_Matched.setBounds(10, 160, 360, 400);
-		panel.add(list_Matched);
+
+		JScrollPane listScroller_Matched = new JScrollPane(list_Matched);
+		listScroller_Matched.setPreferredSize(new Dimension(360, 400));
+		listScroller_Matched.setLayout(new ScrollPaneLayout());
+		listScroller_Matched.setBounds(10, 160, 360, 400);
+		panel.add(listScroller_Matched);
 
 		vector_Unmatched = new Vector<String>();
 		list_Unmatched = new JList(vector_Unmatched);
 		list_Unmatched.setBorder(BorderFactory.createTitledBorder("Unmatched:"));
 		list_Unmatched.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		list_Unmatched.setBounds(430, 160, 360, 400);
-		panel.add(list_Unmatched);
+
+		JScrollPane listScroller_Unmatched = new JScrollPane(list_Unmatched);
+		listScroller_Unmatched.setPreferredSize(new Dimension(364, 400));
+		listScroller_Unmatched.setLayout(new ScrollPaneLayout());
+		listScroller_Unmatched.setBounds(430, 160, 360, 400);
+		panel.add(listScroller_Unmatched);
 	}
 
-	public static void FilterPrepare() {
+	private static void Parsing(String stringParsing) {
+		char[] strChar = stringParsing.toCharArray();
+		for (char ch : strChar) {
+
+		}
+	}
+
+	private static void FilterPrepare() {
 		button_Choose.setEnabled(false);
 		textField_Format.setEditable(false);
-		button_Reset.setEnabled(false);
+		button_Set.setEnabled(false);
 		combox_Operation.setEnabled(false);
 		combox_Process.setEnabled(false);
 		button_Filter.setEnabled(false);
@@ -166,12 +192,13 @@ public class MainFrame extends JFrame {
 		} else {
 			ProcessMode = false;
 		}
+
 		Start = true;
 
 		Filter(OperationMode, ProcessMode);
 	}
 
-	public static void Filter(boolean boolean_opretaionMode, boolean boolean_processMode) {
+	private static void Filter(boolean boolean_opretaionMode, boolean boolean_processMode) {
 		if (!Start)
 			return;
 		if (fileRoot == null)
@@ -183,7 +210,6 @@ public class MainFrame extends JFrame {
 				if (Match(file)) {
 					if (vector_Matched.indexOf(file.getName()) < 0) {
 						vector_Matched.add(file.getName());
-						list_Matched.setListData(vector_Matched);
 					}
 				} else {
 					if (vector_Unmatched.indexOf(file.getName()) < 0) {
@@ -197,14 +223,14 @@ public class MainFrame extends JFrame {
 			} else if (file.isDirectory()) {
 				if (vector_Unmatched.indexOf(file.getName()) < 0) {
 					vector_Unmatched.add(file.getName());
-					list_Unmatched.setListData(vector_Unmatched);
 					if (boolean_processMode)
 						continue;
 					file.delete();
 				}
 			}
 		}
-
+		list_Matched.setListData(vector_Matched);
+		list_Unmatched.setListData(vector_Unmatched);
 		if (boolean_opretaionMode) {
 			Stop();
 			return;
@@ -222,7 +248,7 @@ public class MainFrame extends JFrame {
 		timer.schedule(timeTask, 3000);
 	}
 
-	public static boolean Match(File file) {
+	private static boolean Match(File file) {
 		// TODO
 
 		Random r = new Random();
@@ -234,18 +260,14 @@ public class MainFrame extends JFrame {
 		// return true;
 	}
 
-	public static void Stop() {
+	private static void Stop() {
 		Start = false;
 		button_Choose.setEnabled(true);
 		textField_Format.setEditable(true);
-		button_Reset.setEnabled(true);
+		button_Set.setEnabled(true);
 		combox_Operation.setEnabled(true);
 		combox_Process.setEnabled(true);
 		button_Filter.setEnabled(true);
-	}
-
-	public static void ShowList(Vector<String> vector, JList list, ArrayList<String> arrayList) {
-
 	}
 
 	public static void main(String[] args) {
