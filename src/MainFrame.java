@@ -94,7 +94,6 @@ public class MainFrame extends JFrame {
 		button_Set.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
 				setFormat = new SetFormat();
 				setFormat.setVisible(true);
 			}
@@ -235,6 +234,10 @@ public class MainFrame extends JFrame {
 			Stop();
 			return;
 		}
+		if (vector_Matched.size() + vector_Unmatched.size() > fileRoot.listFiles().length) {
+		//	Stop();
+		//	return;
+		}
 		if (timeTask != null) {
 			timeTask.cancel();
 		}
@@ -245,14 +248,15 @@ public class MainFrame extends JFrame {
 			}
 		};
 		timer = new Timer();
-		timer.schedule(timeTask, 3000);
+		timer.schedule(timeTask, 2000);
 	}
 
 	private static boolean Match(File file) {
 		// TODO
 
 		Random r = new Random();
-		if (r.nextInt() % 2 == 0) {
+		r.nextInt(1000);
+		if (r.nextInt(1000) % 99 == 0) {
 			return true;
 		} else {
 			return false;
@@ -268,12 +272,14 @@ public class MainFrame extends JFrame {
 		combox_Operation.setEnabled(true);
 		combox_Process.setEnabled(true);
 		button_Filter.setEnabled(true);
+		list_Matched.updateUI();
+		list_Unmatched.updateUI();
 	}
 
 	public static void main(String[] args) {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				JFrame frame = new JFrame("File Filter");
+				JFrame frame = new JFrame("File Filter ©ZengYu of UESTC");
 				frame.setSize(800, 600);
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.setResizable(false);
