@@ -26,11 +26,12 @@ public class MainFrame extends JFrame {
 	static SetFormat setFormat;
 	private static JTextField textField_Folder;
 	public static JTextField textField_Format;
-	private static JButton button_Choose, button_Set, button_Filter, button_Stop;
+	private static JButton button_Choose, button_Set, button_Filter, button_Stop, button_Export, button_Delete;
 	private static JComboBox combox_Operation, combox_Process;
 	private static Vector<String> vector_Matched, vector_Unmatched;
 	private static JList list_Matched, list_Unmatched;
 	private static File fileRoot = null;
+	private static File fileExport = null;
 	private static String[] string_OperationMode = { "Manual", "Automate" };
 	private static String[] string_ProcessMode = { "Soft", "Violent" };
 	private static boolean OperationMode, ProcessMode, Start = false;
@@ -64,12 +65,12 @@ public class MainFrame extends JFrame {
 		button_Choose.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JFileChooser fileChooser = new JFileChooser();
-				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				fileChooser.setDialogTitle("Choose root folder:");
-				int result = fileChooser.showDialog(panel, "Choose");
+				JFileChooser fileChooser_Open = new JFileChooser();
+				fileChooser_Open.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				fileChooser_Open.setDialogTitle("Choose root folder:");
+				int result = fileChooser_Open.showDialog(panel, "Choose");
 				if (result == JFileChooser.APPROVE_OPTION) {
-					fileRoot = fileChooser.getSelectedFile();
+					fileRoot = fileChooser_Open.getSelectedFile();
 					textField_Folder.setText(fileRoot.getAbsolutePath());
 					vector_Matched.clear();
 					vector_Unmatched.clear();
@@ -150,7 +151,7 @@ public class MainFrame extends JFrame {
 		JScrollPane listScroller_Matched = new JScrollPane(list_Matched);
 		listScroller_Matched.setPreferredSize(new Dimension(360, 400));
 		listScroller_Matched.setLayout(new ScrollPaneLayout());
-		listScroller_Matched.setBounds(10, 160, 360, 400);
+		listScroller_Matched.setBounds(10, 150, 360, 380);
 		panel.add(listScroller_Matched);
 
 		vector_Unmatched = new Vector<String>();
@@ -161,8 +162,59 @@ public class MainFrame extends JFrame {
 		JScrollPane listScroller_Unmatched = new JScrollPane(list_Unmatched);
 		listScroller_Unmatched.setPreferredSize(new Dimension(364, 400));
 		listScroller_Unmatched.setLayout(new ScrollPaneLayout());
-		listScroller_Unmatched.setBounds(430, 160, 360, 400);
+		listScroller_Unmatched.setBounds(430, 150, 360, 380);
 		panel.add(listScroller_Unmatched);
+
+		button_Export = new JButton("Export");
+		button_Export.setBounds(140, 540, 80, 20);
+		button_Export.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser_Export = new JFileChooser();
+				fileChooser_Export.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				fileChooser_Export.setDialogTitle("Export to:");
+				int result = fileChooser_Export.showDialog(panel, "Export");
+				if (result == JFileChooser.APPROVE_OPTION) {
+					fileExport = fileChooser_Export.getSelectedFile();
+					try {
+						if (!fileExport.exists()) {
+							fileExport.mkdirs();
+						}
+
+						for (String fileName : vector_Matched) {
+							String resName = fileRoot.getAbsolutePath() + "/" + fileName;
+							String desName = fileExport.getAbsolutePath() + "/" + fileName;
+							File resFile = new File(resName);
+							File desFile = new File(desName);
+							if (resFile.exists())
+								resFile.renameTo(desFile);
+						}
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
+		panel.add(button_Export);
+
+		button_Delete = new JButton("Delete");
+		button_Delete.setBounds(580, 540, 80, 20);
+		button_Delete.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					for (String fileName : vector_Unmatched) {
+						String deleteName = fileRoot.getAbsolutePath() + "/" + fileName;
+						File deleteFile = new File(deleteName);
+						if (deleteFile.exists())
+							deleteFile.delete();
+					}
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+		});
+		panel.add(button_Delete);
 	}
 
 	private static void Parsing(String stringParsing) {
@@ -179,6 +231,8 @@ public class MainFrame extends JFrame {
 		combox_Operation.setEnabled(false);
 		combox_Process.setEnabled(false);
 		button_Filter.setEnabled(false);
+		button_Export.setEnabled(false);
+		button_Delete.setEnabled(false);
 		format = textField_Format.getText();
 
 		if (combox_Operation.getSelectedItem().toString().equals(string_OperationMode[0])) {
@@ -210,7 +264,7 @@ public class MainFrame extends JFrame {
 					if (vector_Matched.indexOf(file.getName()) < 0) {
 						vector_Matched.add(file.getName());
 					}
-				} else {
+				} else if (Match(file)) {
 					if (vector_Unmatched.indexOf(file.getName()) < 0) {
 						vector_Unmatched.add(file.getName());
 						list_Unmatched.setListData(vector_Unmatched);
@@ -235,8 +289,8 @@ public class MainFrame extends JFrame {
 			return;
 		}
 		if (vector_Matched.size() + vector_Unmatched.size() > fileRoot.listFiles().length) {
-		//	Stop();
-		//	return;
+			// Stop();
+			// return;
 		}
 		if (timeTask != null) {
 			timeTask.cancel();
@@ -252,8 +306,6 @@ public class MainFrame extends JFrame {
 	}
 
 	private static boolean Match(File file) {
-		// TODO
-
 		Random r = new Random();
 		r.nextInt(1000);
 		if (r.nextInt(1000) % 99 == 0) {
@@ -272,6 +324,8 @@ public class MainFrame extends JFrame {
 		combox_Operation.setEnabled(true);
 		combox_Process.setEnabled(true);
 		button_Filter.setEnabled(true);
+		button_Export.setEnabled(true);
+		button_Delete.setEnabled(true);
 		list_Matched.updateUI();
 		list_Unmatched.updateUI();
 	}

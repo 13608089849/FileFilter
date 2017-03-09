@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Enumeration;
+import java.util.Random;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
@@ -32,11 +33,11 @@ import javax.swing.table.TableColumnModel;
 class SetFormat extends JFrame {
 	JTextField textField_Format, textField_Example;
 	JTable table;
-	JTextField textField_length_int, textField_length_float, textField_length_char, textField_length_string,
+	JTextField textField_length_int, textField_length_char, textField_length_string,
 			textField_length_symbol, textField_value_postfix;
 	JComboBox<String> combobox;
 	JButton button;
-	JLabel label;
+	JLabel label_null,label_1;
 	String[] comboboxItem = { "", "!", "\"", "#", "$", "%", "&", "\'", "(", ")", "*", "+", ",", "-", ".", "/", ":", ";",
 			"<", "=", ">", "?", "@", "[", "\\", "]", "^", "_", "{", "|", "}", "~" };
 
@@ -84,7 +85,7 @@ class SetFormat extends JFrame {
 		JButton button_Confirm = new JButton("Confirm");
 		button_Confirm.setBounds(300, 45, 80, 20);
 		button_Confirm.addActionListener(new ActionListener() {
-						@Override
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				MainFrame.textField_Format.setText(textField_Format.getText());
@@ -96,12 +97,12 @@ class SetFormat extends JFrame {
 		String[] HeaderString = { "Type", "Length", "Value", "Add" };
 		JTextField textFieldNull = new JTextField();
 		textFieldNull.setEditable(false);
-		Object[] RawObject1 = { "Int", textField_length_int, label, button };
-		Object[] RawObject2 = { "Float", textField_length_float, label, button };
-		Object[] RawObject3 = { "Chinese", textField_length_char, label, button };
-		Object[] RawObject4 = { "English", textField_length_string, label, button };
+		Object[] RawObject1 = { "Int", textField_length_int, label_null, button };
+		Object[] RawObject2 = { "Float", label_1, label_null, button };
+		Object[] RawObject3 = { "Chinese", textField_length_char, label_null, button };
+		Object[] RawObject4 = { "English", textField_length_string, label_null, button };
 		Object[] RawObject5 = { "Symbol", textField_length_symbol, combobox, button };
-		Object[] RawObject6 = { "Postfix", label, textField_value_postfix, button };
+		Object[] RawObject6 = { "Postfix", label_1, textField_value_postfix, button };
 		Object[][] tableObject = { RawObject1, RawObject2, RawObject3, RawObject4, RawObject5, RawObject6 };
 
 		TableModel tableModel = new TableModel(HeaderString, tableObject);
@@ -143,9 +144,11 @@ class SetFormat extends JFrame {
 		public boolean isCellEditable(int row, int column) {
 			if (column == 0) {
 				return false;
-			} else if (column == 1 && row == 5) {
+			} else if (column == 1 && row == 1) {
 				return false;
-			} else if (column == 2 && row < 4) {
+			} else if (column == 1 && row == 5){
+				return false;
+			}else if (column == 2 && row <4) {
 				return false;
 			} else {
 				return true;
@@ -181,34 +184,48 @@ class SetFormat extends JFrame {
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					// TODO Auto-generated method stub
-					String Value = null;
-					int index_row = table.getSelectedRow();
-					int index_column = table.getSelectedColumn();
-					if (index_column == 3) {
-						if (index_row == 0) {
-							Value = textField_length_int.getText();
-						} else if (index_row == 1) {
-							Value = textField_length_float.getText();
-						} else if (index_row == 2) {
-							Value = textField_length_char.getText();
-						} else if (index_row == 3) {
-							Value = textField_length_string.getText();
-						} else if (index_row == 4) {
-							Value = combobox.getSelectedItem().toString();
-							String item = Value;
-							int length = Integer.parseInt(textField_length_symbol.getText());
-							if (length > 1) {
-								int i;
-								for (i = 1; i < length; i++) {
-									Value += item;
-								}
-							}
-						} else if (index_row == 5) {
-							Value = textField_value_postfix.getText();
-						}
-						textField_Format.setText(textField_Format.getText() + Value);
-					}
+//					// TODO Auto-generated method stub
+//					String Value = null;
+//					String Example = null;
+//					int index_row = table.getSelectedRow();
+//					if (index_row == 0) {
+//						Example = "5";
+//						int length;
+//						if (textField_length_int.getText().equals("*")) {
+//							length = new Random().nextInt(10);
+//							Value = "<int(*)>";
+//						} else {
+//							length = Integer.parseInt(textField_length_int.getText());
+//							Value = "<int(" + length + ")>";
+//						}
+//						if (length > 1) {
+//							int i;
+//							for (i = 1; i < length; i++) {
+//								Example += "5";
+//							}
+//						}
+//					} else if (index_row == 1) {
+//						Value = textField_value_float.getText();
+//					} else if (index_row == 2) {
+//						Value = textField_length_char.getText();
+//					} else if (index_row == 3) {
+//						Value = textField_length_string.getText();
+//					} else if (index_row == 4) {
+//						Value = combobox.getSelectedItem().toString();
+//						String item = Value;
+//						int length = Integer.parseInt(textField_length_symbol.getText());
+//						if (length > 1) {
+//							int i;
+//							for (i = 1; i < length; i++) {
+//								Value += item;
+//							}
+//						}
+//					} else if (index_row == 5) {
+//						Value = textField_value_postfix.getText();
+//					}
+//					textField_Format.setText(textField_Format.getText() + Value);
+//					textField_Example.setText(textField_Example.getText() + Example);
+//
 				}
 			});
 		}
@@ -226,7 +243,7 @@ class SetFormat extends JFrame {
 				if (row == 0)
 					return textField_length_int;
 				else if (row == 1)
-					return textField_length_float;
+					return label_1;
 				else if (row == 2)
 					return textField_length_char;
 				else if (row == 3)
@@ -240,7 +257,7 @@ class SetFormat extends JFrame {
 			} else if (column == 3) {
 				return button;
 			}
-			return label;
+			return label_null;
 		}
 
 		@Override
@@ -251,27 +268,25 @@ class SetFormat extends JFrame {
 
 	public class TableRenderer implements TableCellRenderer {
 		TableRenderer() {
-			textField_length_int = new JTextField();
-			textField_length_float = new JTextField();
-			textField_length_char = new JTextField();
-			textField_length_string = new JTextField();
-			textField_length_symbol = new JTextField();
-			textField_value_postfix = new JTextField();
+			textField_length_int = new JTextField("*");
+			textField_length_char = new JTextField("*");
+			textField_length_string = new JTextField("*");
+			textField_length_symbol = new JTextField("1");
+			textField_value_postfix = new JTextField("*");
 			button = new JButton("Add");
 			combobox = new JComboBox<>(comboboxItem);
-			label = new JLabel();
-			label.setBackground(Color.GRAY);
+			label_null = new JLabel("");
+			label_1 = new JLabel("1");
 		}
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
-			// TODO Auto-generated method stub
 			if (column == 1) {
 				if (row == 0)
 					return textField_length_int;
 				else if (row == 1)
-					return textField_length_float;
+					return label_1;
 				else if (row == 2)
 					return textField_length_char;
 				else if (row == 3)
@@ -285,7 +300,7 @@ class SetFormat extends JFrame {
 			} else if (column == 3) {
 				return button;
 			}
-			return label;
+			return label_null;
 		}
 	}
 }
