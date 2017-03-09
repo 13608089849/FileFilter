@@ -1,17 +1,12 @@
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.AbstractCellEditor;
-import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -19,27 +14,25 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
+
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 
 class SetFormat extends JFrame {
 	JTextField textField_Format, textField_Example;
 	JTable table;
-	JTextField textField_length_int, textField_length_char, textField_length_string,
-			textField_length_symbol, textField_value_postfix;
+	JTextField textField_length_int, textField_length_char, textField_length_string, textField_length_symbol,
+			textField_value_postfix;
 	JComboBox<String> combobox;
 	JButton button;
-	JLabel label_null,label_1;
+	JLabel label_null, label_1;
 	String[] comboboxItem = { "", "!", "\"", "#", "$", "%", "&", "\'", "(", ")", "*", "+", ",", "-", ".", "/", ":", ";",
 			"<", "=", ">", "?", "@", "[", "\\", "]", "^", "_", "{", "|", "}", "~" };
+	String[] randomChar = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r",
+			"s", "t", "u", "v", "w", "x", "y", "z" };
+	String[] randomString = { "ºì", "³È", "»Æ", "ÂÌ", "Çà", "µí", "×Ï", "ºÚ", "°×", "»Ò" };
+	ArrayList<FormatParsing> arrayList = new ArrayList();
 
 	SetFormat() {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -99,8 +92,8 @@ class SetFormat extends JFrame {
 		textFieldNull.setEditable(false);
 		Object[] RawObject1 = { "Int", textField_length_int, label_null, button };
 		Object[] RawObject2 = { "Float", label_1, label_null, button };
-		Object[] RawObject3 = { "Chinese", textField_length_char, label_null, button };
-		Object[] RawObject4 = { "English", textField_length_string, label_null, button };
+		Object[] RawObject3 = { "English", textField_length_char, label_null, button };
+		Object[] RawObject4 = { "Chinese", textField_length_string, label_null, button };
 		Object[] RawObject5 = { "Symbol", textField_length_symbol, combobox, button };
 		Object[] RawObject6 = { "Postfix", label_1, textField_value_postfix, button };
 		Object[][] tableObject = { RawObject1, RawObject2, RawObject3, RawObject4, RawObject5, RawObject6 };
@@ -146,9 +139,9 @@ class SetFormat extends JFrame {
 				return false;
 			} else if (column == 1 && row == 1) {
 				return false;
-			} else if (column == 1 && row == 5){
+			} else if (column == 1 && row == 5) {
 				return false;
-			}else if (column == 2 && row <4) {
+			} else if (column == 2 && row < 4) {
 				return false;
 			} else {
 				return true;
@@ -184,48 +177,87 @@ class SetFormat extends JFrame {
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-//					// TODO Auto-generated method stub
-//					String Value = null;
-//					String Example = null;
-//					int index_row = table.getSelectedRow();
-//					if (index_row == 0) {
-//						Example = "5";
-//						int length;
-//						if (textField_length_int.getText().equals("*")) {
-//							length = new Random().nextInt(10);
-//							Value = "<int(*)>";
-//						} else {
-//							length = Integer.parseInt(textField_length_int.getText());
-//							Value = "<int(" + length + ")>";
-//						}
-//						if (length > 1) {
-//							int i;
-//							for (i = 1; i < length; i++) {
-//								Example += "5";
-//							}
-//						}
-//					} else if (index_row == 1) {
-//						Value = textField_value_float.getText();
-//					} else if (index_row == 2) {
-//						Value = textField_length_char.getText();
-//					} else if (index_row == 3) {
-//						Value = textField_length_string.getText();
-//					} else if (index_row == 4) {
-//						Value = combobox.getSelectedItem().toString();
-//						String item = Value;
-//						int length = Integer.parseInt(textField_length_symbol.getText());
-//						if (length > 1) {
-//							int i;
-//							for (i = 1; i < length; i++) {
-//								Value += item;
-//							}
-//						}
-//					} else if (index_row == 5) {
-//						Value = textField_value_postfix.getText();
-//					}
-//					textField_Format.setText(textField_Format.getText() + Value);
-//					textField_Example.setText(textField_Example.getText() + Example);
-//
+					// TODO Auto-generated method stub
+					String Value = "";
+					String Example = "";
+					int length;
+					int index_row = table.getSelectedRow();
+					if (index_row == 0) { // int
+						if (textField_length_int.getText().equals("*")) {
+							length = new Random().nextInt(10);
+							Value = "<int(*)>";
+						} else {
+							length = Integer.parseInt(textField_length_int.getText());
+							Value = "<int(" + length + ")>";
+						}
+						if (length == 1) {
+							Example += new Random().nextInt(10);
+						} else if (length > 1) {
+							int i;
+							for (i = 0; i < length; i++) {
+								Example += new Random().nextInt(10);
+							}
+						}
+					} else if (index_row == 1) { // float
+						Value = "<float(1)>";
+						Example += new Random().nextInt(100) + new Random().nextFloat() / 10;
+					} else if (index_row == 2) { // char
+						if (textField_length_char.getText().equals("*")) {
+							length = new Random().nextInt(10);
+							Value = "<char(*)>";
+						} else {
+							length = Integer.parseInt(textField_length_char.getText());
+							Value = "<char(" + length + ")>";
+						}
+						if (length == 1) {
+							Example += randomChar[new Random().nextInt(26)];
+						} else if (length > 1) {
+							int i;
+							for (i = 0; i < length; i++) {
+								Example += randomChar[new Random().nextInt(26)];
+							}
+						}
+					} else if (index_row == 3) { // string
+						if (textField_length_string.getText().equals("*")) {
+							length = new Random().nextInt(5);
+							Value = "<string(*)>";
+						} else {
+							length = Integer.parseInt(textField_length_string.getText());
+							Value = "<string(" + length + ")>";
+						}
+						if (length == 1) {
+							Example += randomString[new Random().nextInt(10)];
+						} else if (length > 1) {
+							int i;
+							for (i = 0; i < length; i++) {
+								Example += randomString[new Random().nextInt(10)];
+							}
+
+						}
+					} else if (index_row == 4) { // symbol
+						String item = combobox.getSelectedItem().toString();
+						if (textField_length_symbol.getText().equals("*")) {
+							length = new Random().nextInt(5);
+							Value = "<symbol(*){" + item + "}>";
+						} else {
+							length = Integer.parseInt(textField_length_symbol.getText());
+							Value = "<symbol(" + length + "){" + item + "}>";
+						}
+						if (length == 1) {
+							Example += item;
+						} else if (length > 1) {
+							int i;
+							int j = new Random().nextInt(10);
+							for (i = 0; i < length; i++) {
+								Example += item;
+							}
+						}
+					} else if (index_row == 5) { // postfix
+						Example = textField_value_postfix.getText();
+						Value = "<postfix(1){" + Example + "}>";
+					}
+					textField_Format.setText(textField_Format.getText() + Value);
+					textField_Example.setText(textField_Example.getText() + Example);
 				}
 			});
 		}

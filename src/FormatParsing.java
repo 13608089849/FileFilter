@@ -1,6 +1,6 @@
 
 public class FormatParsing {
-	static Object content;
-	static String Type;
-	static int length;
+	public static String Type;
+	public static String length;
+	public static String value;
 }
