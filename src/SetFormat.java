@@ -27,12 +27,10 @@ class SetFormat extends JFrame {
 	JComboBox<String> combobox;
 	JButton button;
 	JLabel label_null, label_1;
-	String[] comboboxItem = { "", "!", "\"", "#", "$", "%", "&", "\'", "(", ")", "*", "+", ",", "-", ".", "/", ":", ";",
-			"<", "=", ">", "?", "@", "[", "\\", "]", "^", "_", "{", "|", "}", "~" };
-	String[] randomChar = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r",
-			"s", "t", "u", "v", "w", "x", "y", "z" };
+	public String[] comboboxItem = { "", "!", "\"", "#", "$", "%", "&", "\'", "(", ")", "*", "+", ",", "-", ".", "/",
+			":", ";", "<", "=", ">", "?", "@", "[", "\\", "]", "^", "_", "{", "|", "}", "~" };
 	String[] randomString = { "ºì", "³È", "»Æ", "ÂÌ", "Çà", "µí", "×Ï", "ºÚ", "°×", "»Ò" };
-	ArrayList<FormatParsing> arrayList = new ArrayList();
+	ArrayList<FormatParsing> arrayFormat = new ArrayList();
 
 	SetFormat() {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -66,6 +64,8 @@ class SetFormat extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				textField_Format.setText(null);
+				textField_Example.setText(null);
+				arrayFormat.clear();
 			}
 		});
 		panel.add(button_Reset);
@@ -82,6 +82,7 @@ class SetFormat extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				MainFrame.textField_Format.setText(textField_Format.getText());
+				MainFrame.setFormat(arrayFormat);
 			}
 		});
 
@@ -180,7 +181,8 @@ class SetFormat extends JFrame {
 					// TODO Auto-generated method stub
 					String Value = "";
 					String Example = "";
-					int length;
+					FormatParsing formatParsing = new FormatParsing();
+					int length = 1;
 					int index_row = table.getSelectedRow();
 					if (index_row == 0) { // int
 						if (textField_length_int.getText().equals("*")) {
@@ -190,6 +192,8 @@ class SetFormat extends JFrame {
 							length = Integer.parseInt(textField_length_int.getText());
 							Value = "<int(" + length + ")>";
 						}
+						formatParsing.setType("int");
+						formatParsing.setValue("");
 						if (length == 1) {
 							Example += new Random().nextInt(10);
 						} else if (length > 1) {
@@ -200,6 +204,8 @@ class SetFormat extends JFrame {
 						}
 					} else if (index_row == 1) { // float
 						Value = "<float(1)>";
+						formatParsing.setType("float");
+						formatParsing.setValue("");
 						Example += new Random().nextInt(100) + new Random().nextFloat() / 10;
 					} else if (index_row == 2) { // char
 						if (textField_length_char.getText().equals("*")) {
@@ -209,12 +215,14 @@ class SetFormat extends JFrame {
 							length = Integer.parseInt(textField_length_char.getText());
 							Value = "<char(" + length + ")>";
 						}
+						formatParsing.setType("char");
+						formatParsing.setValue("");
 						if (length == 1) {
-							Example += randomChar[new Random().nextInt(26)];
+							Example += (char) (new Random().nextInt(26) + 97);
 						} else if (length > 1) {
 							int i;
 							for (i = 0; i < length; i++) {
-								Example += randomChar[new Random().nextInt(26)];
+								Example += (char) (new Random().nextInt(26) + 97);
 							}
 						}
 					} else if (index_row == 3) { // string
@@ -225,6 +233,8 @@ class SetFormat extends JFrame {
 							length = Integer.parseInt(textField_length_string.getText());
 							Value = "<string(" + length + ")>";
 						}
+						formatParsing.setType("string");
+						formatParsing.setValue("");
 						if (length == 1) {
 							Example += randomString[new Random().nextInt(10)];
 						} else if (length > 1) {
@@ -243,6 +253,8 @@ class SetFormat extends JFrame {
 							length = Integer.parseInt(textField_length_symbol.getText());
 							Value = "<symbol(" + length + "){" + item + "}>";
 						}
+						formatParsing.setType("symbol");
+						formatParsing.setValue(item);
 						if (length == 1) {
 							Example += item;
 						} else if (length > 1) {
@@ -254,8 +266,12 @@ class SetFormat extends JFrame {
 						}
 					} else if (index_row == 5) { // postfix
 						Example = textField_value_postfix.getText();
+						formatParsing.setType("postfix");
+						formatParsing.setValue(Example);
 						Value = "<postfix(1){" + Example + "}>";
 					}
+					formatParsing.setLength("" + length);
+					arrayFormat.add(formatParsing);
 					textField_Format.setText(textField_Format.getText() + Value);
 					textField_Example.setText(textField_Example.getText() + Example);
 				}

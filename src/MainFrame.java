@@ -38,8 +38,7 @@ public class MainFrame extends JFrame {
 	public static String format = "";
 	private static TimerTask timeTask;
 	private static Timer timer;
-	private ArrayList<FormatParsing> arrayFormat = new ArrayList();
-	private ArrayList<FormatParsing> arrayFile = new ArrayList();
+	public static ArrayList<FormatParsing> arrayFormat = new ArrayList();
 
 	private static void InitLayout(JPanel panel) {
 		JFrame.setDefaultLookAndFeelDecorated(true);
@@ -180,7 +179,6 @@ public class MainFrame extends JFrame {
 						if (!fileExport.exists()) {
 							fileExport.mkdirs();
 						}
-
 						for (String fileName : vector_Matched) {
 							String resName = fileRoot.getAbsolutePath() + "/" + fileName;
 							String desName = fileExport.getAbsolutePath() + "/" + fileName;
@@ -217,11 +215,17 @@ public class MainFrame extends JFrame {
 		panel.add(button_Delete);
 	}
 
-	private static void Parsing(String stringParsing) {
+	public static void setFormat(ArrayList<FormatParsing> ArrayFormat) {
+		arrayFormat = ArrayFormat;
+	}
+
+	private static FormatParsing Parsing(String stringParsing) {
+		FormatParsing parsing = new FormatParsing();
 		char[] strChar = stringParsing.toCharArray();
 		for (char ch : strChar) {
 
 		}
+		return parsing;
 	}
 
 	private static void FilterPrepare() {
@@ -306,6 +310,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private static boolean Match(File file) {
+		FormatParsing parsing = Parsing(file.getName());
 		Random r = new Random();
 		r.nextInt(1000);
 		if (r.nextInt(1000) % 99 == 0) {
@@ -314,6 +319,7 @@ public class MainFrame extends JFrame {
 			return false;
 		}
 		// return true;
+
 	}
 
 	private static void Stop() {
