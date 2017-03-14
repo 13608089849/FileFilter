@@ -2,8 +2,11 @@
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.UUID;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.JButton;
@@ -22,21 +25,48 @@ import javax.swing.table.TableCellRenderer;
 class SetFormat extends JFrame {
 	JTextField textField_Format, textField_Example;
 	JTable table;
-	JTextField textField_length_int, textField_length_char, textField_length_string, textField_length_symbol,
-			textField_value_postfix;
+	JTextField textField_length_int, textField_length_char, textField_length_chinese, textField_length_string,
+			textField_length_symbol, textField_value_postfix;
 	JComboBox<String> combobox;
 	JButton button;
-	JLabel label_null, label_1;
+	JLabel label_null, label_1, label_int, label_float, label_char, label_chinese, label_string, label_symbol,
+			label_postfix;
 	public String[] comboboxItem = { "", "!", "\"", "#", "$", "%", "&", "\'", "(", ")", "*", "+", ",", "-", ".", "/",
 			":", ";", "<", "=", ">", "?", "@", "[", "\\", "]", "^", "_", "{", "|", "}", "~" };
 	String[] randomString = { "红", "橙", "黄", "绿", "青", "淀", "紫", "黑", "白", "灰" };
-	ArrayList<FormatParsing> arrayFormat = new ArrayList();
+	String regEx = "";
 
 	SetFormat() {
+		textField_length_int = new JTextField("1");
+		textField_length_char = new JTextField("1");
+		textField_length_chinese = new JTextField("1");
+		textField_length_string = new JTextField("1");
+		textField_length_symbol = new JTextField("1");
+		textField_value_postfix = new JTextField("");
+		button = new JButton("Add");
+		combobox = new JComboBox<>(comboboxItem);
+		label_null = new JLabel("");
+		label_1 = new JLabel("1");
+
+		label_int = new JLabel("Int");
+		label_int.setToolTipText("设置数量为length的个位整数");
+		label_float = new JLabel("Float");
+		label_float.setToolTipText("设置数量为1的小数");
+		label_char = new JLabel("Char");
+		label_char.setToolTipText("设置数量为length的单个字母");
+		label_chinese = new JLabel("Chinese");
+		label_chinese.setToolTipText("设置数量为length的单个汉字");
+		label_string = new JLabel("String");
+		label_string.setToolTipText("设置数量在（1-length）之间任意个字符");
+		label_symbol = new JLabel("Symbol");
+		label_symbol.setToolTipText("设置数量为length的自选符号");
+		label_postfix = new JLabel("Postfix");
+		label_postfix.setToolTipText("设置数量为1的自定义后缀");
+		
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				JFrame frame = new JFrame("Format Setting");
-				frame.setSize(400, 300);
+				frame.setSize(400, 330);
 				frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				frame.setResizable(false);
 				JPanel panel = new JPanel();
@@ -62,10 +92,9 @@ class SetFormat extends JFrame {
 		button_Reset.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				textField_Format.setText(null);
 				textField_Example.setText(null);
-				arrayFormat.clear();
+				regEx = "";
 			}
 		});
 		panel.add(button_Reset);
@@ -80,9 +109,8 @@ class SetFormat extends JFrame {
 		button_Confirm.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				MainFrame.textField_Format.setText(textField_Format.getText());
-				MainFrame.setFormat(arrayFormat);
+				MainFrame.setFormat(regEx);
 			}
 		});
 
@@ -94,10 +122,11 @@ class SetFormat extends JFrame {
 		Object[] RawObject1 = { "Int", textField_length_int, label_null, button };
 		Object[] RawObject2 = { "Float", label_1, label_null, button };
 		Object[] RawObject3 = { "English", textField_length_char, label_null, button };
-		Object[] RawObject4 = { "Chinese", textField_length_string, label_null, button };
-		Object[] RawObject5 = { "Symbol", textField_length_symbol, combobox, button };
-		Object[] RawObject6 = { "Postfix", label_1, textField_value_postfix, button };
-		Object[][] tableObject = { RawObject1, RawObject2, RawObject3, RawObject4, RawObject5, RawObject6 };
+		Object[] RawObject4 = { "Chinese", textField_length_chinese, label_null, button };
+		Object[] RawObject5 = { "String", textField_length_string, label_null, button };
+		Object[] RawObject6 = { "Symbol", textField_length_symbol, combobox, button };
+		Object[] RawObject7 = { "Postfix", label_1, textField_value_postfix, button };
+		Object[][] tableObject = { RawObject1, RawObject2, RawObject3, RawObject4, RawObject5, RawObject6, RawObject7 };
 
 		TableModel tableModel = new TableModel(HeaderString, tableObject);
 		table = new JTable(tableModel);
@@ -108,6 +137,8 @@ class SetFormat extends JFrame {
 
 		TableRenderer tableRenderer = new TableRenderer();
 		TableEditor tableEditor = new TableEditor();
+		table.getColumnModel().getColumn(0).setCellRenderer(tableRenderer);
+		table.getColumnModel().getColumn(0).setCellEditor(tableEditor);
 		table.getColumnModel().getColumn(1).setCellRenderer(tableRenderer);
 		table.getColumnModel().getColumn(1).setCellEditor(tableEditor);
 		table.getColumnModel().getColumn(2).setCellRenderer(tableRenderer);
@@ -115,7 +146,7 @@ class SetFormat extends JFrame {
 		table.getColumnModel().getColumn(3).setCellRenderer(tableRenderer);
 		table.getColumnModel().getColumn(3).setCellEditor(tableEditor);
 		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setBounds(10, 90, 370, 155);
+		scrollPane.setBounds(10, 90, 370, 177);
 
 		panel.add(scrollPane);
 	}
@@ -178,115 +209,85 @@ class SetFormat extends JFrame {
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					// TODO Auto-generated method stub
 					String Value = "";
 					String Example = "";
-					FormatParsing formatParsing = new FormatParsing();
 					int length = 1;
 					int index_row = table.getSelectedRow();
-					if (index_row == 0) { // int
-						if (textField_length_int.getText().equals("*")) {
-							length = new Random().nextInt(10);
-							Value = "<int(*)>";
-						} else {
-							length = Integer.parseInt(textField_length_int.getText());
-							Value = "<int(" + length + ")>";
-						}
-						formatParsing.setType("int");
-						formatParsing.setValue("");
-						if (length == 1) {
+					if (index_row == 0) { // int finish
+						length = Integer.parseInt(textField_length_int.getText());
+						Value = "\\d{" + length + "}";
+						int i;
+						for (i = 0; i < length; i++) {
 							Example += new Random().nextInt(10);
-						} else if (length > 1) {
-							int i;
-							for (i = 0; i < length; i++) {
-								Example += new Random().nextInt(10);
-							}
 						}
-					} else if (index_row == 1) { // float
-						Value = "<float(1)>";
-						formatParsing.setType("float");
-						formatParsing.setValue("");
+					} else if (index_row == 1) { // float finish
+						Value = "\\d+.{1}\\d+";
 						Example += new Random().nextInt(100) + new Random().nextFloat() / 10;
-					} else if (index_row == 2) { // char
-						if (textField_length_char.getText().equals("*")) {
-							length = new Random().nextInt(10);
-							Value = "<char(*)>";
-						} else {
-							length = Integer.parseInt(textField_length_char.getText());
-							Value = "<char(" + length + ")>";
-						}
-						formatParsing.setType("char");
-						formatParsing.setValue("");
-						if (length == 1) {
+					} else if (index_row == 2) { // char finish
+						length = Integer.parseInt(textField_length_char.getText());
+						Value = "[a-zA-Z]{" + length + "}";
+						int i;
+						for (i = 0; i < length; i++) {
 							Example += (char) (new Random().nextInt(26) + 97);
-						} else if (length > 1) {
-							int i;
-							for (i = 0; i < length; i++) {
-								Example += (char) (new Random().nextInt(26) + 97);
-							}
 						}
-					} else if (index_row == 3) { // string
-						if (textField_length_string.getText().equals("*")) {
-							length = new Random().nextInt(5);
-							Value = "<string(*)>";
-						} else {
-							length = Integer.parseInt(textField_length_string.getText());
-							Value = "<string(" + length + ")>";
-						}
-						formatParsing.setType("string");
-						formatParsing.setValue("");
-						if (length == 1) {
+					} else if (index_row == 3) { // Chinese finish
+						length = Integer.parseInt(textField_length_chinese.getText());
+						Value = "[\\u4e00-\\u9faf]{" + length + "}";
+						int i;
+						for (i = 0; i < length; i++) {
 							Example += randomString[new Random().nextInt(10)];
-						} else if (length > 1) {
-							int i;
-							for (i = 0; i < length; i++) {
-								Example += randomString[new Random().nextInt(10)];
-							}
-
 						}
-					} else if (index_row == 4) { // symbol
+					} else if (index_row == 4) { // string finish
+						length = Integer.parseInt(textField_length_string.getText());
+						Value = ".{1," + length + "}";
+						int i;
+						Example += UUID.randomUUID().toString().substring(0, length);
+					} else if (index_row == 5) { // symbol finish
 						String item = combobox.getSelectedItem().toString();
-						if (textField_length_symbol.getText().equals("*")) {
-							length = new Random().nextInt(5);
-							Value = "<symbol(*){" + item + "}>";
-						} else {
-							length = Integer.parseInt(textField_length_symbol.getText());
-							Value = "<symbol(" + length + "){" + item + "}>";
-						}
-						formatParsing.setType("symbol");
-						formatParsing.setValue(item);
-						if (length == 1) {
+						length = Integer.parseInt(textField_length_symbol.getText());
+						Value = "[" + item + "]{" + length + "}";
+						int i;
+						int j = new Random().nextInt(10);
+						for (i = 0; i < length; i++) {
 							Example += item;
-						} else if (length > 1) {
-							int i;
-							int j = new Random().nextInt(10);
-							for (i = 0; i < length; i++) {
-								Example += item;
-							}
 						}
-					} else if (index_row == 5) { // postfix
+					} else if (index_row == 6) { // postfix finish
 						Example = textField_value_postfix.getText();
-						formatParsing.setType("postfix");
-						formatParsing.setValue(Example);
-						Value = "<postfix(1){" + Example + "}>";
+						Value = Example + "{1}";
 					}
-					formatParsing.setLength("" + length);
-					arrayFormat.add(formatParsing);
+
 					textField_Format.setText(textField_Format.getText() + Value);
 					textField_Example.setText(textField_Example.getText() + Example);
+					regEx += Value;
 				}
 			});
 		}
 
 		@Override
 		public Object getCellEditorValue() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
 				int column) {
+			if (column == 0) {
+				if (row == 0) {
+					return label_int;
+				} else if (row == 1) {
+					return label_float;
+				} else if (row == 2) {
+					return label_char;
+				} else if (row == 3) {
+					return label_chinese;
+				} else if (row == 4) {
+					return label_string;
+				} else if (row == 5) {
+					return label_symbol;
+				} else if (row == 6) {
+					return label_postfix;
+				}
+			} else 
 			if (column == 1) {
 				if (row == 0)
 					return textField_length_int;
@@ -295,12 +296,16 @@ class SetFormat extends JFrame {
 				else if (row == 2)
 					return textField_length_char;
 				else if (row == 3)
-					return textField_length_string;
+					return textField_length_chinese;
 				else if (row == 4)
+					return textField_length_string;
+				else if (row == 5)
 					return textField_length_symbol;
-			} else if (column == 2 && row == 4) {
-				return combobox;
+				else if (row == 6)
+					return label_1;
 			} else if (column == 2 && row == 5) {
+				return combobox;
+			} else if (column == 2 && row == 6) {
 				return textField_value_postfix;
 			} else if (column == 3) {
 				return button;
@@ -315,22 +320,55 @@ class SetFormat extends JFrame {
 	}
 
 	public class TableRenderer implements TableCellRenderer {
-		TableRenderer() {
-			textField_length_int = new JTextField("*");
-			textField_length_char = new JTextField("*");
-			textField_length_string = new JTextField("*");
+		public TableRenderer() {
+			textField_length_int = new JTextField("1");
+			textField_length_char = new JTextField("1");
+			textField_length_chinese = new JTextField("1");
+			textField_length_string = new JTextField("1");
 			textField_length_symbol = new JTextField("1");
-			textField_value_postfix = new JTextField("*");
+			textField_value_postfix = new JTextField("");
 			button = new JButton("Add");
 			combobox = new JComboBox<>(comboboxItem);
 			label_null = new JLabel("");
 			label_1 = new JLabel("1");
+
+			label_int = new JLabel("Int");
+			label_int.setToolTipText("设置数量为length的个位整数");
+			label_float = new JLabel("Float");
+			label_float.setToolTipText("设置数量为1的小数");
+			label_char = new JLabel("Char");
+			label_char.setToolTipText("设置数量为length的单个字母");
+			label_chinese = new JLabel("Chinese");
+			label_chinese.setToolTipText("设置数量为length的单个汉字");
+			label_string = new JLabel("String");
+			label_string.setToolTipText("设置数量在（1-length）之间任意个字符");
+			label_symbol = new JLabel("Symbol");
+			label_symbol.setToolTipText("设置数量为length的自选符号");
+			label_postfix = new JLabel("Postfix");
+			label_postfix.setToolTipText("设置数量为1的自定义后缀");
 		}
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
-			if (column == 1) {
+
+			if (column == 0) {
+				if (row == 0) {
+					return label_int;
+				} else if (row == 1) {
+					return label_float;
+				} else if (row == 2) {
+					return label_char;
+				} else if (row == 3) {
+					return label_chinese;
+				} else if (row == 4) {
+					return label_string;
+				} else if (row == 5) {
+					return label_symbol;
+				} else if (row == 6) {
+					return label_postfix;
+				}
+			} else if (column == 1) {
 				if (row == 0)
 					return textField_length_int;
 				else if (row == 1)
@@ -338,12 +376,16 @@ class SetFormat extends JFrame {
 				else if (row == 2)
 					return textField_length_char;
 				else if (row == 3)
-					return textField_length_string;
+					return textField_length_chinese;
 				else if (row == 4)
+					return textField_length_string;
+				else if (row == 5)
 					return textField_length_symbol;
-			} else if (column == 2 && row == 4) {
-				return combobox;
+				else if (row == 6)
+					return label_1;
 			} else if (column == 2 && row == 5) {
+				return combobox;
+			} else if (column == 2 && row == 6) {
 				return textField_value_postfix;
 			} else if (column == 3) {
 				return button;

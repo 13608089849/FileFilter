@@ -2,12 +2,17 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -38,7 +43,7 @@ public class MainFrame extends JFrame {
 	public static String format = "";
 	private static TimerTask timeTask;
 	private static Timer timer;
-	public static ArrayList<FormatParsing> arrayFormat = new ArrayList();
+	public static String RegEx = "";
 
 	private static void InitLayout(JPanel panel) {
 		JFrame.setDefaultLookAndFeelDecorated(true);
@@ -126,8 +131,8 @@ public class MainFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (textField_Folder.getText().isEmpty() || textField_Format.getText().isEmpty())
-					// return;
-					FilterPrepare();
+					return;
+				FilterPrepare();
 			}
 		});
 		panel.add(button_Filter);
@@ -215,22 +220,8 @@ public class MainFrame extends JFrame {
 		panel.add(button_Delete);
 	}
 
-	public static void setFormat(ArrayList<FormatParsing> ArrayFormat) {
-		arrayFormat = ArrayFormat;
-	}
-
-	private static FormatParsing Parsing(String stringParsing) {
-		FormatParsing parsing = new FormatParsing();
-		char[] strChar = stringParsing.toCharArray();
-		for (char ch : strChar) {
-
-		}
-		return parsing;
-	}
-
 	private static void FilterPrepare() {
 		button_Choose.setEnabled(false);
-		textField_Format.setEditable(false);
 		button_Set.setEnabled(false);
 		combox_Operation.setEnabled(false);
 		combox_Process.setEnabled(false);
@@ -268,7 +259,7 @@ public class MainFrame extends JFrame {
 					if (vector_Matched.indexOf(file.getName()) < 0) {
 						vector_Matched.add(file.getName());
 					}
-				} else if (Match(file)) {
+				} else {
 					if (vector_Unmatched.indexOf(file.getName()) < 0) {
 						vector_Unmatched.add(file.getName());
 						list_Unmatched.setListData(vector_Unmatched);
@@ -309,23 +300,25 @@ public class MainFrame extends JFrame {
 		timer.schedule(timeTask, 2000);
 	}
 
-	private static boolean Match(File file) {
-		FormatParsing parsing = Parsing(file.getName());
-		Random r = new Random();
-		r.nextInt(1000);
-		if (r.nextInt(1000) % 99 == 0) {
-			return true;
-		} else {
-			return false;
-		}
-		// return true;
+	public static void setFormat(String regEx) {
+		RegEx = regEx;
+	}
 
+	private static boolean Match(File file) {
+		System.out.println(RegEx);
+		String str = file.getName();
+		System.out.println(str);
+		Pattern pattern = Pattern.compile(RegEx);
+		Matcher matcher = pattern.matcher(str);
+		System.out.println(matcher.matches());
+		if (matcher.matches())
+			return true;
+		return false;
 	}
 
 	private static void Stop() {
 		Start = false;
 		button_Choose.setEnabled(true);
-		textField_Format.setEditable(true);
 		button_Set.setEnabled(true);
 		combox_Operation.setEnabled(true);
 		combox_Process.setEnabled(true);
