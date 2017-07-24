@@ -45,7 +45,7 @@ public class MainFrame extends JFrame {
 	private static Timer timer;
 	public static String RegEx = "";
 
-	private static void InitLayout(JPanel panel) {
+	private static void initLayout(JPanel panel) {
 		JFrame.setDefaultLookAndFeelDecorated(true);
 
 		panel.setLayout(null);
@@ -132,7 +132,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (textField_Folder.getText().isEmpty() || textField_Format.getText().isEmpty())
 					return;
-				FilterPrepare();
+				filterPrepare();
 			}
 		});
 		panel.add(button_Filter);
@@ -142,7 +142,7 @@ public class MainFrame extends JFrame {
 		button_Stop.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Stop();
+				stop();
 			}
 		});
 		panel.add(button_Stop);
@@ -220,7 +220,7 @@ public class MainFrame extends JFrame {
 		panel.add(button_Delete);
 	}
 
-	private static void FilterPrepare() {
+	private static void filterPrepare() {
 		button_Choose.setEnabled(false);
 		button_Set.setEnabled(false);
 		combox_Operation.setEnabled(false);
@@ -243,10 +243,10 @@ public class MainFrame extends JFrame {
 
 		Start = true;
 
-		Filter(OperationMode, ProcessMode);
+		filter(OperationMode, ProcessMode);
 	}
 
-	private static void Filter(boolean boolean_opretaionMode, boolean boolean_processMode) {
+	private static void filter(boolean boolean_opretaionMode, boolean boolean_processMode) {
 		if (!Start)
 			return;
 		if (fileRoot == null)
@@ -255,7 +255,7 @@ public class MainFrame extends JFrame {
 			return;
 		for (File file : fileRoot.listFiles()) {
 			if (file.isFile()) {
-				if (Match(file)) {
+				if (match(file)) {
 					if (vector_Matched.indexOf(file.getName()) < 0) {
 						vector_Matched.add(file.getName());
 					}
@@ -280,7 +280,7 @@ public class MainFrame extends JFrame {
 		list_Matched.setListData(vector_Matched);
 		list_Unmatched.setListData(vector_Unmatched);
 		if (boolean_opretaionMode) {
-			Stop();
+			stop();
 			return;
 		}
 		if (vector_Matched.size() + vector_Unmatched.size() > fileRoot.listFiles().length) {
@@ -293,7 +293,7 @@ public class MainFrame extends JFrame {
 		timeTask = new TimerTask() {
 			@Override
 			public void run() {
-				Filter(boolean_opretaionMode, boolean_processMode);
+				filter(boolean_opretaionMode, boolean_processMode);
 			}
 		};
 		timer = new Timer();
@@ -304,7 +304,7 @@ public class MainFrame extends JFrame {
 		RegEx = regEx;
 	}
 
-	private static boolean Match(File file) {
+	private static boolean match(File file) {
 		System.out.println(RegEx);
 		String str = file.getName();
 		System.out.println(str);
@@ -316,7 +316,7 @@ public class MainFrame extends JFrame {
 		return false;
 	}
 
-	private static void Stop() {
+	private static void stop() {
 		Start = false;
 		button_Choose.setEnabled(true);
 		button_Set.setEnabled(true);
@@ -339,7 +339,7 @@ public class MainFrame extends JFrame {
 				JPanel panel = new JPanel();
 				frame.add(panel);
 				frame.setVisible(true);
-				InitLayout(panel);
+				initLayout(panel);
 			}
 		});
 	}
