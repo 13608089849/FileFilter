@@ -14,16 +14,16 @@ During living in univercity, we hand in paper to class committee sometimes. As c
 
 ***As you can see, on main UI, you can set something about filter rule.***
 
-![](https://github.com/frogfans/FileFilter/blob/master/image/main.jpeg)
+![](image/main.jpeg?raw=true)
 
 ### **Set format**
 
 ***Here you can easily set format of file you want by regular expression.***
 
-![](https://github.com/frogfans/FileFilter/blob/master/image/setFormat.jpeg)
+![](image/setFormat.jpeg?raw=true)
 
 ### **Result**
 
 ***Result of filter.***
 
-![](https://github.com/frogfans/FileFilter/blob/master/image/result.jpeg)
+![](image/result.jpeg?raw=true)
